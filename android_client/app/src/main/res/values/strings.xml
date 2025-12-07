@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Клиент МИСКА</string>
+    
+    <!-- Settings -->
+    <string name="settings_title">Настройки</string>
+    <string name="server_ip">IP-адрес сервера</string>
+    <string name="server_port">Порт сервера</string>
+    <string name="connect">Подключиться</string>
+    <string name="disconnect">Отключиться</string>
+    <string name="connection_status">Статус подключения</string>
+    <string name="connected">Подключено</string>
+    <string name="disconnected">Отключено</string>
+    <string name="connecting">Подключение...</string>
+    <string name="auto_connect">Автоматическое подключение</string>
+    <string name="client_info">Информация о клиенте</string>
+    <string name="device_id">ID устройства</string>
+    <string name="client_id">ID клиента</string>
+    
+    <!-- Main Screen -->
+    <string name="monitoring_status">Статус мониторинга</string>
+    <string name="monitoring_active">Активен</string>
+    <string name="monitoring_inactive">Неактивен</string>
+    <string name="pending_violations">Неподтвержденные нарушения</string>
+    <string name="recent_violations">Последние нарушения</string>
+    
+    <!-- Violation Detail -->
+    <string name="violation_details">Детали нарушения</string>
+    <string name="zone_name">Зона</string>
+    <string name="timestamp">Время</string>
+    <string name="confidence">Уверенность</string>
+    <string name="coordinates">Координаты</string>
+    <string name="confirm">Подтвердить</string>
+    <string name="false_positive">Ложное срабатывание</string>
+    <string name="status">Статус</string>
+    <string name="pending">Ожидает</string>
+    <string name="confirmed">Подтверждено</string>
+    <string name="false_positive_status">Ложное срабатывание</string>
+    
+    <!-- History -->
+    <string name="violations_history">История нарушений</string>
+    <string name="filter">Фильтр</string>
+    <string name="search">Поиск</string>
+    <string name="all_statuses">Все статусы</string>
+    
+    <!-- Errors -->
+    <string name="error_no_internet">Нет подключения к интернету</string>
+    <string name="error_server_unavailable">Сервер недоступен. Проверьте IP-адрес и порт</string>
+    <string name="error_timeout">Превышено время ожидания ответа</string>
+    <string name="error_not_found">Ресурс не найден</string>
+    <string name="error_server_error">Ошибка сервера</string>
+    <string name="error_invalid_ip">Неверный IP-адрес</string>
+    <string name="error_connection_failed">Ошибка подключения</string>
+    
+    <!-- Notifications -->
+    <string name="notification_channel_name">Уведомления о нарушениях</string>
+    <string name="notification_channel_description">Уведомления о нарушениях в запретных зонах</string>
+    <string name="notification_title">Нарушение в зоне %1$s</string>
+    <string name="notification_text">Обнаружено нарушение в %1$s</string>
+</resources>
+

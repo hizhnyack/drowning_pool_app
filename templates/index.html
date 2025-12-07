@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>МИСКА РИС</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>МИСКА РИС</h1>
+            <nav>
+                <a href="/">Главная</a>
+                <a href="/logs">Логи</a>
+            </nav>
+        </header>
+
+        <main>
+            <div class="video-section">
+                <div class="video-container">
+                    <img id="videoStream" src="/api/video/stream" alt="Видеопоток">
+                    <canvas id="zonesCanvas" width="1280" height="720"></canvas>
+                </div>
+                
+                <div class="controls">
+                    <div class="control-group">
+                        <h3>Управление видео</h3>
+                        <button id="startCamera" class="btn btn-primary">Запустить камеру</button>
+                        <button id="playVideo" class="btn btn-primary">Воспроизвести</button>
+                        <button id="pauseVideo" class="btn btn-secondary">Пауза</button>
+                        <button id="stopVideo" class="btn btn-danger">Стоп</button>
+                    </div>
+
+                    <div class="control-group">
+                        <h3>Загрузка видео</h3>
+                        <input type="file" id="videoFile" accept="video/*" style="display: none;">
+                        <button id="uploadVideo" class="btn btn-primary">Выбрать файл</button>
+                        <span id="videoFileName"></span>
+                    </div>
+
+                    <div class="control-group">
+                        <h3>Модель детекции</h3>
+                        <select id="detectionModel" class="select">
+                            <option value="">Выберите модель...</option>
+                        </select>
+                        <div id="modelStatus" class="status-indicator"></div>
+                    </div>
+
+                    <div class="control-group">
+                        <h3>Мониторинг</h3>
+                        <button id="startMonitoring" class="btn btn-success">Запустить мониторинг</button>
+                        <button id="stopMonitoring" class="btn btn-danger">Остановить мониторинг</button>
+                        <button id="sendTestNotification" class="btn btn-primary">Отправить тест</button>
+                        <div id="monitoringStatus" class="status-indicator"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="zones-section">
+                <h2>Управление зонами</h2>
+                <div class="zones-controls">
+                    <button id="addZone" class="btn btn-primary">Добавить зону</button>
+                    <button id="editZones" class="btn btn-secondary">Редактировать зоны</button>
+                    <button id="saveZones" class="btn btn-success" style="display: none;">Сохранить</button>
+                    <button id="cancelEdit" class="btn btn-danger" style="display: none;">Отмена</button>
+                </div>
+                <div id="zonesList" class="zones-list"></div>
+            </div>
+        </main>
+    </div>
+
+    <script src="/static/js/main.js"></script>
+    <script src="/static/js/zones.js"></script>
+    <script>
+        // Дополнительная проверка после загрузки всех скриптов
+        window.addEventListener('load', function() {
+            console.log('index.html: Все скрипты загружены, проверка кнопки addZone');
+            const addZoneBtn = document.getElementById('addZone');
+            console.log('index.html: addZone найден:', !!addZoneBtn);
+            if (addZoneBtn) {
+                console.log('index.html: Привязка обработчика напрямую в HTML');
+                addZoneBtn.addEventListener('click', function(e) {
+                    console.log('index.html: КНОПКА "Добавить зону" НАЖАТА (из HTML)!', e);
+                    e.preventDefault();
+                    e.stopPropagation();
+                    if (typeof startAddingZone === 'function') {
+                        console.log('index.html: Вызов startAddingZone()');
+                        startAddingZone();
+                    } else {
+                        console.error('index.html: ОШИБКА - функция startAddingZone не найдена!');
+                    }
+                    return false;
+                });
+            }
+        });
+    </script>
+</body>
+</html>

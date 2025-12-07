@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Логи нарушений - Система мониторинга</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="/static/css/logs.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Логи нарушений</h1>
+            <nav>
+                <a href="/">Главная</a>
+                <a href="/logs">Логи</a>
+            </nav>
+        </header>
+
+        <main>
+            <div class="stats-section">
+                <h2>Статистика</h2>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <h3>Всего нарушений</h3>
+                        <p id="statTotal" class="stat-value">0</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Подтверждено</h3>
+                        <p id="statConfirmed" class="stat-value confirmed">0</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Ложные срабатывания</h3>
+                        <p id="statFalse" class="stat-value false">0</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Ожидают ответа</h3>
+                        <p id="statPending" class="stat-value pending">0</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="filters-section">
+                <h2>Фильтры</h2>
+                <div class="filters">
+                    <div class="filter-group">
+                        <label>Статус:</label>
+                        <select id="filterStatus" class="select">
+                            <option value="">Все</option>
+                            <option value="pending">Ожидает ответа</option>
+                            <option value="confirmed">Подтверждено</option>
+                            <option value="false_positive">Ложное срабатывание</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label>Зона:</label>
+                        <select id="filterZone" class="select">
+                            <option value="">Все зоны</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label>С даты:</label>
+                        <input type="date" id="filterStartDate" class="input">
+                    </div>
+                    <div class="filter-group">
+                        <label>По дату:</label>
+                        <input type="date" id="filterEndDate" class="input">
+                    </div>
+                    <div class="filter-group">
+                        <button id="applyFilters" class="btn btn-primary">Применить</button>
+                        <button id="resetFilters" class="btn btn-secondary">Сбросить</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="export-section">
+                <button id="exportCsv" class="btn btn-success">Экспорт CSV</button>
+                <button id="exportJson" class="btn btn-success">Экспорт JSON</button>
+            </div>
+
+            <div class="logs-section">
+                <h2>Нарушения</h2>
+                <div id="logsTable" class="logs-table">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Время</th>
+                                <th>Изображение</th>
+                                <th>Зона</th>
+                                <th>Статус</th>
+                                <th>Уверенность</th>
+                                <th>Оператор</th>
+                                <th>Действия</th>
+                            </tr>
+                        </thead>
+                        <tbody id="logsTableBody">
+                            <tr>
+                                <td colspan="7">Загрузка...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="pagination">
+                    <button id="prevPage" class="btn btn-secondary">Предыдущая</button>
+                    <span id="pageInfo">Страница 1</span>
+                    <button id="nextPage" class="btn btn-secondary">Следующая</button>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Модальное окно для просмотра изображения -->
+    <div id="imageModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <img id="modalImage" src="" alt="Изображение нарушения">
+        </div>
+    </div>
+
+    <script src="/static/js/logs.js"></script>
+</body>
+</html>
+

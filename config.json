@@ -1,0 +1,36 @@
+{
+  "server": {
+    "host": "0.0.0.0",
+    "port": 8000,
+    "debug": false
+  },
+  "video": {
+    "camera_index": 0,
+    "fps": 30,
+    "width": 1280,
+    "height": 720,
+    "detection_fps": 10
+  },
+  "detection": {
+    "model": "yolo",
+    "confidence_threshold": 0.5,
+    "iou_threshold": 0.45,
+    "model_path": null
+  },
+  "zones": {
+    "storage": "database"
+  },
+  "notifications": {
+    "timeout": 300,
+    "image_quality": 85,
+    "max_image_size": 1920
+  },
+  "database": {
+    "path": "data/database.db"
+  },
+  "storage": {
+    "violations_path": "data/violations",
+    "uploads_path": "data/uploads"
+  }
+}
+

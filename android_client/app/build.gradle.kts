@@ -90,6 +90,9 @@ dependencies {
     implementation("com.github.bumptech.glide:glide:4.16.0")
     kapt("com.github.bumptech.glide:compiler:4.16.0")
     
+    // Image Zoom
+    implementation("com.github.chrisbanes:PhotoView:2.3.0")
+    
     // Preferences
     implementation("androidx.preference:preference-ktx:1.2.1")
     

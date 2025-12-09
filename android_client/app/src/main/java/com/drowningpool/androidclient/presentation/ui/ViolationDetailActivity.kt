@@ -121,6 +121,7 @@ class ViolationDetailActivity : AppCompatActivity() {
             .load(imageUrl)
             .placeholder(android.R.drawable.ic_menu_gallery)
             .error(android.R.drawable.ic_menu_report_image)
+            .fitCenter() // Используем fitCenter вместо centerCrop, чтобы не обрезать изображение
             .into(binding.imageViolation)
     }
     

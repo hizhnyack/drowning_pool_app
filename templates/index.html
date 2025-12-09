@@ -45,6 +45,22 @@
                             <option value="">Выберите модель...</option>
                         </select>
                         <div id="modelStatus" class="status-indicator"></div>
+                        
+                        <div style="margin-top: 15px;">
+                            <label for="confidenceThreshold" style="display: block; margin-bottom: 5px;">
+                                Порог уверенности: <span id="confidenceValue">50%</span>
+                            </label>
+                            <input type="range" id="confidenceThreshold" min="0" max="100" value="50" 
+                                   style="width: 100%;" step="1">
+                            <div style="display: flex; justify-content: space-between; font-size: 0.8em; color: #666;">
+                                <span>0%</span>
+                                <span>50%</span>
+                                <span>100%</span>
+                            </div>
+                            <button id="applyConfidence" class="btn btn-primary" style="margin-top: 5px; width: 100%;">
+                                Применить
+                            </button>
+                        </div>
                     </div>
 
                     <div class="control-group">

@@ -57,5 +57,10 @@
     <string name="notification_channel_description">Уведомления о нарушениях в запретных зонах</string>
     <string name="notification_title">Нарушение в зоне %1$s</string>
     <string name="notification_text">Обнаружено нарушение в %1$s</string>
+    <string name="notification_settings">Настройки уведомлений</string>
+    <string name="notification_sound">Звук уведомлений</string>
+    <string name="select_notification_sound">Выбрать звук</string>
+    <string name="default_sound">Системный звук по умолчанию</string>
+    <string name="system_settings">Настройка системы</string>
 </resources>
 

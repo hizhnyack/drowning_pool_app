@@ -5,6 +5,8 @@ import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.media.RingtoneManager
+import android.net.Uri
 import android.os.Build
 import androidx.core.app.NotificationCompat
 import com.drowningpool.androidclient.R
@@ -28,6 +30,9 @@ class NotificationHelper @Inject constructor(
     
     private fun createNotificationChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val soundUri = preferencesManager.notificationSoundUri?.let { Uri.parse(it) }
+                ?: RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
+            
             val channel = NotificationChannel(
                 CHANNEL_ID,
                 context.getString(R.string.notification_channel_name),
@@ -36,13 +41,31 @@ class NotificationHelper @Inject constructor(
                 description = context.getString(R.string.notification_channel_description)
                 enableVibration(preferencesManager.notificationVibrationEnabled)
                 if (preferencesManager.notificationSoundEnabled) {
-                    setSound(null, null) // Используем системный звук
+                    setSound(soundUri, null)
                 } else {
                     setSound(null, null)
                     enableVibration(false)
                 }
             }
             notificationManager.createNotificationChannel(channel)
+        }
+    }
+    
+    fun updateNotificationChannel() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val channel = notificationManager.getNotificationChannel(CHANNEL_ID)
+            if (channel != null) {
+                val soundUri = preferencesManager.notificationSoundUri?.let { Uri.parse(it) }
+                    ?: RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
+                
+                channel.enableVibration(preferencesManager.notificationVibrationEnabled)
+                if (preferencesManager.notificationSoundEnabled) {
+                    channel.setSound(soundUri, null)
+                } else {
+                    channel.setSound(null, null)
+                }
+                notificationManager.createNotificationChannel(channel)
+            }
         }
     }
     
@@ -63,6 +86,9 @@ class NotificationHelper @Inject constructor(
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
         
+        val soundUri = preferencesManager.notificationSoundUri?.let { Uri.parse(it) }
+            ?: RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
+        
         val notification = NotificationCompat.Builder(context, CHANNEL_ID)
             .setSmallIcon(android.R.drawable.ic_dialog_alert)
             .setContentTitle(context.getString(R.string.notification_title, zoneName))
@@ -73,6 +99,7 @@ class NotificationHelper @Inject constructor(
             .setContentIntent(pendingIntent)
             .setAutoCancel(true)
             .setVibrate(if (preferencesManager.notificationVibrationEnabled) longArrayOf(0, 500, 250, 500) else null)
+            .setSound(if (preferencesManager.notificationSoundEnabled) soundUri else null)
             .build()
         
         notificationManager.notify(violationId.hashCode(), notification)

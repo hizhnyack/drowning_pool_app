@@ -1,11 +1,19 @@
 package com.drowningpool.androidclient.data.repository
 
+import android.content.Context
 import com.drowningpool.androidclient.data.api.ApiServiceFactory
 import com.drowningpool.androidclient.data.local.PendingResponseDao
 import com.drowningpool.androidclient.data.local.PendingResponseEntity
 import com.drowningpool.androidclient.data.websocket.WebSocketClient
 import com.drowningpool.androidclient.domain.model.NotificationResponse
+import com.drowningpool.androidclient.utils.NotificationHelper
+import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import java.time.Instant
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -14,8 +22,28 @@ import javax.inject.Singleton
 class NotificationRepository @Inject constructor(
     private val webSocketClient: WebSocketClient,
     private val apiServiceFactory: ApiServiceFactory,
-    private val pendingResponseDao: PendingResponseDao
+    private val pendingResponseDao: PendingResponseDao,
+    private val notificationHelper: NotificationHelper,
+    @ApplicationContext private val context: Context
 ) {
+    private val repositoryScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
+    
+    init {
+        // Подписываемся на уведомления и показываем их даже когда приложение закрыто
+        webSocketClient.notifications
+            .onEach { notification ->
+                notification?.let {
+                    android.util.Log.d("NotificationRepository", "Received notification in repository: ${it.violationId}")
+                    // Показываем уведомление независимо от того, открыто приложение или нет
+                    notificationHelper.showViolationNotification(
+                        it.violationId,
+                        it.zoneName,
+                        it.timestamp
+                    )
+                }
+            }
+            .launchIn(repositoryScope)
+    }
     
     fun connect(serverUrl: String, clientId: String, context: android.content.Context? = null) {
         webSocketClient.connect(serverUrl, clientId)

@@ -38,6 +38,9 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
         
+        // Предотвращаем отключение экрана при открытом приложении
+        window.addFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+        
         setupToolbar()
         setupRecyclerView()
         setupObservers()
@@ -121,13 +124,7 @@ class MainActivity : AppCompatActivity() {
                     // Синхронизируемся с сервером после получения уведомления
                     viewModel.onNotificationReceived(it)
                     
-                    // Показываем системное уведомление (при нажатии на него откроется экран деталей)
-                    notificationHelper.showViolationNotification(
-                        it.violationId,
-                        it.zoneName,
-                        it.timestamp
-                    )
-                    
+                    // Уведомление уже показывается в NotificationRepository
                     // Автоматически открываем экран деталей нарушения только если приложение на переднем плане
                     // Если приложение в фоне, пользователь откроет через системное уведомление
                     if (!isFinishing && !isDestroyed && hasWindowFocus()) {
@@ -168,9 +165,17 @@ class MainActivity : AppCompatActivity() {
     
     override fun onResume() {
         super.onResume()
+        // Предотвращаем отключение экрана при открытом приложении
+        window.addFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
         // Обновляем список нарушений при возврате на экран (только если есть подключение)
         if (preferencesManager.clientId != null && preferencesManager.getServerBaseUrl().isNotEmpty()) {
             viewModel.refreshViolations()
         }
+    }
+    
+    override fun onPause() {
+        super.onPause()
+        // Убираем флаг при уходе с экрана (опционально, можно оставить)
+        // window.clearFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
     }
 }

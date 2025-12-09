@@ -10,8 +10,11 @@ import android.os.PowerManager
 import androidx.core.app.NotificationCompat
 import com.drowningpool.androidclient.R
 import com.drowningpool.androidclient.presentation.ui.MainActivity
+import com.drowningpool.androidclient.utils.NotificationHelper
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -19,6 +22,9 @@ class WebSocketService : Service() {
     
     @Inject
     lateinit var webSocketClient: WebSocketClient
+    
+    @Inject
+    lateinit var notificationHelper: NotificationHelper
     
     private val binder = LocalBinder()
     private var wakeLock: PowerManager.WakeLock? = null
@@ -37,6 +43,24 @@ class WebSocketService : Service() {
         createNotificationChannel()
         startForeground(NOTIFICATION_ID, createNotification())
         acquireWakeLock()
+        setupNotificationListener()
+    }
+    
+    private fun setupNotificationListener() {
+        // Подписываемся на уведомления в сервисе для надежности
+        // Это гарантирует, что уведомления будут показаны даже если приложение закрыто
+        webSocketClient.notifications
+            .onEach { notification ->
+                notification?.let {
+                    android.util.Log.d("WebSocketService", "Received notification in service: ${it.violationId}")
+                    notificationHelper.showViolationNotification(
+                        it.violationId,
+                        it.zoneName,
+                        it.timestamp
+                    )
+                }
+            }
+            .launchIn(serviceScope)
     }
     
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {

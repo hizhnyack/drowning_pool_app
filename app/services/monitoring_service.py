@@ -56,7 +56,7 @@ class MonitoringService:
         
         # Дебаунсинг: храним последние нарушения по зонам
         self.last_violations: Dict[str, float] = {}  # zone_id -> timestamp
-        self.debounce_time = 5.0  # секунд между срабатываниями для одной зоны
+        self.debounce_time = 10.0  # секунд между срабатываниями для одной зоны
         
         # Очередь уведомлений
         self.violations_queue: List[Violation] = []
@@ -153,29 +153,65 @@ class MonitoringService:
                 if not detections:
                     continue
                 
-                logger.debug(f"Обнаружено {len(detections)} детекций")
+                # Логируем обнаружение людей с указанием уверенности
+                detections_info = ", ".join([f"{det.confidence:.2%}" for det in detections])
+                logger.info(f"Обнаружено {len(detections)} человек(а) | Уверенность: {detections_info}")
+                
+                # Проверяем наличие зон
+                all_zones = zone_service.get_all_zones()
+                if not all_zones:
+                    logger.warning("Нет настроенных зон для проверки нарушений! Создайте зоны через веб-интерфейс.")
+                    continue
+                
+                # Получаем размеры кадра для проверки координат
+                frame_height, frame_width = frame.shape[:2]
+                logger.debug(f"Размер кадра: {frame_width}x{frame_height}, детекций: {len(detections)}, зон: {len(all_zones)}")
+                
+                # Логируем информацию о детекциях
+                for i, det in enumerate(detections):
+                    logger.debug(f"Детекция {i}: bbox={det.bbox}, confidence={det.confidence:.2f}, center={det.center}")
+                
+                # Логируем информацию о зонах
+                for zone in all_zones:
+                    zone_points_str = ", ".join([f"({p.x}, {p.y})" for p in zone.points])
+                    logger.debug(f"Зона '{zone.name}' (ID: {zone.id}): точки={zone_points_str}")
                 
                 # Проверка нарушений
                 violations = zone_service.check_violation(detections)
                 
+                if violations:
+                    logger.info(f"НАРУШЕНИЕ: Обнаружено {len(violations)} человек(а) в контролируемых зонах!")
+                else:
+                    logger.debug("Нарушений не обнаружено (детекции не попали в зоны)")
+                
                 # Обработка нарушений с дебаунсингом
                 for violation_data in violations:
                     zone_id = violation_data["zone_id"]
-                    detection = violation_data["detection"]
+                    zone_name = violation_data["zone_name"]
+                    detection = violation_data["detection"]  # Это уже объект Detection
+                    
+                    # Логируем факт обнаружения человека в зоне
+                    bbox = detection.bbox
+                    center = detection.center
+                    logger.warning(
+                        f"ЧЕЛОВЕК В ЗОНЕ: Зона '{zone_name}' (ID: {zone_id}) | "
+                        f"Уверенность: {detection.confidence:.2%} | "
+                        f"Позиция: центр=({center[0]}, {center[1]}), bbox=({bbox[0]}, {bbox[1]}, {bbox[2]}, {bbox[3]})"
+                    )
                     
                     # Дебаунсинг: проверяем, не было ли недавно нарушения в этой зоне
                     last_time = self.last_violations.get(zone_id, 0)
                     if current_time - last_time < self.debounce_time:
-                        logger.debug(f"Нарушение в зоне {zone_id} пропущено из-за дебаунсинга")
+                        logger.debug(f"Нарушение в зоне '{zone_name}' пропущено из-за дебаунсинга (последнее было {current_time - last_time:.1f} сек назад)")
                         continue
                     
-                    logger.warning(f"Обнаружено нарушение в зоне {violation_data['zone_name']} (ID: {zone_id})")
+                    logger.info(f"Регистрация нарушения в зоне '{zone_name}' (ID: {zone_id})")
                     
                     # Создаем нарушение
                     violation = self._create_violation(
                         zone_id=zone_id,
                         zone_name=violation_data["zone_name"],
-                        detection=detections[0],  # Берем первую детекцию
+                        detection=detection,  # Используем правильный объект Detection
                         frame=frame
                     )
                     

@@ -360,6 +360,28 @@ class VideoService:
                     else:
                         return None
                 
+                # Рисуем рамки на обнаруженных людях
+                try:
+                    from app.services.detection_service import detection_service
+                    if detection_service.current_model is not None:
+                        detections = detection_service.detect(frame)
+                        for det in detections:
+                            x1, y1, x2, y2 = det.bbox
+                            # Рисуем зеленую рамку для всех детекций
+                            cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 255, 0), 2)
+                            # Добавляем текст с уверенностью
+                            label = f"Person {det.confidence:.2%}"
+                            label_size, _ = cv2.getTextSize(label, cv2.FONT_HERSHEY_SIMPLEX, 0.6, 2)
+                            # Фон для текста
+                            cv2.rectangle(frame, (x1, y1 - label_size[1] - 10), 
+                                        (x1 + label_size[0], y1), (0, 255, 0), -1)
+                            # Текст
+                            cv2.putText(frame, label, (x1, y1 - 5), 
+                                      cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 0, 0), 2)
+                except Exception as e:
+                    # Если ошибка при детекции, просто продолжаем без рамок
+                    pass
+                
                 # Кодирование в JPEG
                 ret, buffer = cv2.imencode('.jpg', frame, [cv2.IMWRITE_JPEG_QUALITY, 85])
                 if not ret:

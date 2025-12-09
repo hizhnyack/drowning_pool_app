@@ -194,21 +194,25 @@ class ZoneService:
         if zones is None:
             zones = self.get_all_zones()
         
+        if not zones:
+            return []
+        
         violations = []
         
         for zone in zones:
             for detection in detections:
-                if hasattr(detection, 'bbox'):
-                    if self.bbox_intersects_zone(detection.bbox, zone):
-                        violations.append({
-                            "zone_id": zone.id,
-                            "zone_name": zone.name,
-                            "detection": detection.to_dict() if hasattr(detection, 'to_dict') else {
-                                "bbox": detection.bbox,
-                                "center": getattr(detection, 'center', None),
-                                "confidence": getattr(detection, 'confidence', 0.0)
-                            }
-                        })
+                if not hasattr(detection, 'bbox'):
+                    continue
+                
+                # Проверяем пересечение
+                intersects = self.bbox_intersects_zone(detection.bbox, zone)
+                if intersects:
+                    # Сохраняем сам объект Detection, а не словарь
+                    violations.append({
+                        "zone_id": zone.id,
+                        "zone_name": zone.name,
+                        "detection": detection  # Передаем объект Detection напрямую
+                    })
         
         return violations
 

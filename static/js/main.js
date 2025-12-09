@@ -12,6 +12,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     await window.loadZones();
     await checkMonitoringStatus();
     setupEventListeners();
+    // Загружаем конфигурацию после настройки обработчиков
+    await loadModelConfig();
 });
 
 // Настройка обработчиков событий
@@ -35,6 +37,42 @@ function setupEventListeners() {
     document.getElementById('startMonitoring').addEventListener('click', startMonitoring);
     document.getElementById('stopMonitoring').addEventListener('click', stopMonitoring);
     document.getElementById('sendTestNotification').addEventListener('click', sendTestNotification);
+    
+    // Управление порогом уверенности
+    const confidenceSlider = document.getElementById('confidenceThreshold');
+    const confidenceValue = document.getElementById('confidenceValue');
+    const applyConfidenceBtn = document.getElementById('applyConfidence');
+    
+    if (confidenceSlider && confidenceValue) {
+        // Используем несколько типов событий для надежности
+        confidenceSlider.addEventListener('input', function(e) {
+            const value = e.target.value;
+            confidenceValue.textContent = value + '%';
+            console.log('Порог уверенности изменен на:', value + '%');
+        });
+        confidenceSlider.addEventListener('change', function(e) {
+            const value = e.target.value;
+            confidenceValue.textContent = value + '%';
+            console.log('Порог уверенности изменен (change):', value + '%');
+        });
+        // Также добавляем обработчик через oninput для совместимости
+        confidenceSlider.oninput = function() {
+            const value = this.value;
+            confidenceValue.textContent = value + '%';
+            console.log('Порог уверенности изменен (oninput):', value + '%');
+        };
+    } else {
+        console.error('Элементы confidenceThreshold или confidenceValue не найдены', {
+            slider: !!confidenceSlider,
+            value: !!confidenceValue
+        });
+    }
+    
+    if (applyConfidenceBtn) {
+        applyConfidenceBtn.addEventListener('click', applyConfidenceThreshold);
+    } else {
+        console.error('Элемент applyConfidence не найден');
+    }
 }
 
 // Загрузка списка моделей
@@ -61,6 +99,51 @@ async function loadModels() {
         }
     } catch (error) {
         console.error('Ошибка при загрузке моделей:', error);
+    }
+}
+
+// Загрузка конфигурации модели
+async function loadModelConfig() {
+    try {
+        const response = await fetch('/api/models/current');
+        const config = await response.json();
+        const slider = document.getElementById('confidenceThreshold');
+        const valueDisplay = document.getElementById('confidenceValue');
+        
+        if (config.confidence_threshold !== undefined && slider && valueDisplay) {
+            const thresholdPercent = Math.round(config.confidence_threshold * 100);
+            slider.value = thresholdPercent;
+            valueDisplay.textContent = thresholdPercent + '%';
+            console.log('Загружен порог уверенности:', thresholdPercent + '%');
+        } else {
+            if (!slider) console.warn('Элемент confidenceThreshold не найден');
+            if (!valueDisplay) console.warn('Элемент confidenceValue не найден');
+        }
+    } catch (error) {
+        console.error('Ошибка при загрузке конфигурации модели:', error);
+    }
+}
+
+// Применение порога уверенности
+async function applyConfidenceThreshold() {
+    const slider = document.getElementById('confidenceThreshold');
+    const threshold = parseFloat(slider.value) / 100; // Преобразуем из процентов в дробь
+    
+    try {
+        const response = await fetch('/api/models/config', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                confidence_threshold: threshold,
+                iou_threshold: 0.45 // Оставляем IoU без изменений
+            })
+        });
+        const result = await response.json();
+        console.log('Порог уверенности обновлен:', result);
+        alert(`Порог уверенности установлен: ${Math.round(threshold * 100)}%\nТеперь система будет детектировать людей с уверенностью >= ${Math.round(threshold * 100)}%`);
+    } catch (error) {
+        console.error('Ошибка при изменении порога уверенности:', error);
+        alert('Ошибка при изменении порога уверенности');
     }
 }
 

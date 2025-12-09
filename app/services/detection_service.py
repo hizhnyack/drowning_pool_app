@@ -152,7 +152,8 @@ class DetectionService:
         if self.yolo_model is None:
             return []
         
-        results = self.yolo_model(frame, conf=self.confidence_threshold, iou=self.iou_threshold)
+        # verbose=False отключает автоматический вывод YOLO
+        results = self.yolo_model(frame, conf=self.confidence_threshold, iou=self.iou_threshold, verbose=False)
         detections = []
         
         for result in results:
@@ -168,6 +169,14 @@ class DetectionService:
                         confidence=confidence,
                         class_id=0
                     ))
+        
+        # Выводим информацию только если есть детекции
+        if detections:
+            h, w = frame.shape[:2]
+            persons_count = len(detections)
+            # Форматируем вывод в стиле YOLO
+            print(f"\n0: {h}x{w} {persons_count} person{'s' if persons_count > 1 else ''}, {results[0].speed.get('inference', 0):.1f}ms")
+            print(f"Speed: {results[0].speed.get('preprocess', 0):.1f}ms preprocess, {results[0].speed.get('inference', 0):.1f}ms inference, {results[0].speed.get('postprocess', 0):.1f}ms postprocess per image at shape (1, 3, {h}, {w})")
         
         return detections
     

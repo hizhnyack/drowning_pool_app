@@ -39,6 +39,10 @@ class PreferencesManager @Inject constructor(
         get() = prefs.getBoolean("notification_vibration_enabled", true)
         set(value) = prefs.edit().putBoolean("notification_vibration_enabled", value).apply()
     
+    var notificationSoundUri: String?
+        get() = prefs.getString("notification_sound_uri", null)
+        set(value) = prefs.edit().putString("notification_sound_uri", value).apply()
+    
     fun getServerBaseUrl(): String {
         return "http://$serverIp:$serverPort"
     }
